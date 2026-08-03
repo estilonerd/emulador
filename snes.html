@@ -343,6 +343,7 @@
             width: clamp(154px, min(40vw, 22svh), 184px);
             aspect-ratio: 1;
             position: relative;
+            transform: translateY(12px);
         }
 
         .dpad-wrap::before {
@@ -866,7 +867,7 @@
 
                 .dpad-wrap {
                     width: clamp(172px, 45vw, 194px);
-                    transform: translateX(2px);
+                    transform: translate(-12px, 0);
                 }
 
                 .face-buttons {
@@ -887,7 +888,7 @@
 
                 .dpad-wrap {
                     width: 160px;
-                    transform: translateX(2px);
+                    transform: translate(-8px, 0);
                 }
 
                 .face-buttons {
@@ -898,6 +899,10 @@
             }
 
             @media (orientation: landscape) and (max-height: 520px) {
+                .dpad-wrap {
+                    transform: none;
+                }
+
                 .face-buttons {
                     --face-size: clamp(46px, min(6.4vw, 12.2svh), 52px);
                     --face-inset: 12px;
