@@ -81,12 +81,12 @@
 
         .emulator-shell.show-native-menu {
             overflow: visible;
-            z-index: 2147483000;
+            z-index: 2147483500;
         }
 
         .emulator-shell.show-native-menu::before {
             position: fixed;
-            z-index: 2147482998;
+            z-index: 2147483498;
         }
 
         .emulator-shell.show-native-menu .screen-frame,
@@ -95,7 +95,7 @@
         }
 
         .emulator-shell.show-native-menu .screen-frame {
-            z-index: 2147482999;
+            z-index: 2147483499;
         }
 
         .screen-frame {
@@ -160,7 +160,7 @@
             opacity: 1 !important;
             transform: translate(-50%, -50%) !important;
             pointer-events: auto !important;
-            z-index: 2147483001 !important;
+            z-index: 2147483501 !important;
             overflow-y: auto !important;
             flex-direction: column !important;
             flex-wrap: nowrap !important;
@@ -1049,10 +1049,6 @@
                     shell.classList.remove('show-native-menu');
                 }
 
-                if (window.EJS_emulator && window.EJS_emulator.menu && window.EJS_emulator.menu.close) {
-                    window.EJS_emulator.menu.close(true);
-                }
-
                 if (menu) {
                     menu.style.setProperty('display', 'none', 'important');
                     menu.style.setProperty('opacity', '0', 'important');
@@ -1233,14 +1229,6 @@
                 }
 
                 shell.classList.toggle('show-native-menu', shouldOpen);
-
-                if (window.EJS_emulator && window.EJS_emulator.menu) {
-                    if (shouldOpen && window.EJS_emulator.menu.open) {
-                        window.EJS_emulator.menu.open(true);
-                    } else if (!shouldOpen && window.EJS_emulator.menu.close) {
-                        window.EJS_emulator.menu.close(true);
-                    }
-                }
 
                 menu.style.setProperty('display', shouldOpen ? 'flex' : 'none', 'important');
                 menu.style.setProperty('opacity', shouldOpen ? '1' : '0', 'important');
