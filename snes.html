@@ -366,6 +366,19 @@
             -webkit-user-drag: none;
         }
 
+        @media (orientation: portrait) {
+            .ios-controller-logo {
+                display: block;
+                position: absolute;
+                left: 50%;
+                top: calc(clamp(7px, 1.3svh, 10px) + (clamp(34px, 5svh, 44px) / 2));
+                width: clamp(108px, 29vw, 132px);
+                height: clamp(42px, 7.2svh, 54px);
+                object-fit: contain;
+                transform: translate(-50%, -50%);
+            }
+        }
+
         .main-controls {
             display: grid;
             grid-template-columns: auto auto;
@@ -772,16 +785,17 @@
 
             .dpad-wrap {
                 grid-column: 1;
-                width: clamp(146px, min(24vw, 42svh), 178px);
-                justify-self: center;
+                width: clamp(160px, min(26vw, 46svh), 196px);
+                justify-self: end;
+                margin-right: clamp(16px, 2vw, 20px);
                 pointer-events: auto;
             }
 
             .face-buttons {
                 grid-column: 3;
-                --face-size: clamp(40px, min(5.6vw, 10.4svh), 44px);
+                --face-size: clamp(44px, min(6.2vw, 11.4svh), 50px);
                 --face-inset: 10px;
-                width: clamp(150px, min(20.4vw, 38svh), 170px);
+                width: clamp(166px, min(22.5vw, 42svh), 190px);
                 justify-self: end;
                 pointer-events: auto;
                 transform: translateY(24px);
@@ -891,6 +905,18 @@
             .dpad-hit {
                 pointer-events: auto;
             }
+
+            .ios-controller-logo {
+                display: block;
+                position: fixed;
+                left: calc(env(safe-area-inset-left) + 10px + (clamp(174px, 27vw, 212px) / 2));
+                bottom: max(38px, calc(env(safe-area-inset-bottom) + 32px));
+                width: clamp(118px, 15.5vw, 148px);
+                height: clamp(44px, 8svh, 58px);
+                object-fit: contain;
+                transform: translateX(-50%);
+                z-index: 4;
+            }
         }
 
         @supports (-webkit-touch-callout: none) {
@@ -964,6 +990,9 @@
                 }
 
                 .dpad-wrap {
+                    width: clamp(146px, min(24vw, 42svh), 178px);
+                    justify-self: center;
+                    margin-right: 0;
                     transform: none;
                 }
 

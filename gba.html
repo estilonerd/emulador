@@ -328,6 +328,16 @@
             -webkit-user-drag: none;
         }
 
+        @media (orientation: portrait) {
+            .ios-controller-logo {
+                display: block;
+                flex: 0 1 auto;
+                width: clamp(102px, 27vw, 124px);
+                height: clamp(40px, 7svh, 50px);
+                object-fit: contain;
+            }
+        }
+
         .main-controls {
             display: grid;
             grid-template-columns: minmax(158px, 1fr) minmax(142px, 0.9fr);
@@ -660,14 +670,15 @@
 
             .dpad-wrap {
                 grid-column: 1;
-                width: clamp(146px, min(24vw, 42svh), 178px);
-                justify-self: center;
+                width: clamp(158px, min(26vw, 46svh), 194px);
+                justify-self: end;
+                margin-right: clamp(16px, 2vw, 20px);
                 pointer-events: auto;
             }
 
             .face-buttons {
                 grid-column: 3;
-                width: clamp(126px, min(18.6vw, 34svh), 146px);
+                width: clamp(140px, min(20.8vw, 38svh), 164px);
                 aspect-ratio: 1;
                 justify-self: end;
                 pointer-events: auto;
@@ -675,7 +686,7 @@
             }
 
             .face-action {
-                width: clamp(46px, min(8.3vw, 13.6svh), 56px);
+                width: clamp(52px, min(9.2vw, 15svh), 62px);
                 border-width: 3px;
                 font-size: clamp(16px, 4.8svh, 22px);
                 pointer-events: auto;
@@ -774,6 +785,18 @@
             .dpad-hit {
                 pointer-events: auto;
             }
+
+            .ios-controller-logo {
+                display: block;
+                position: fixed;
+                left: calc(env(safe-area-inset-left) + 10px + (clamp(174px, 27vw, 212px) / 2));
+                bottom: max(38px, calc(env(safe-area-inset-bottom) + 32px));
+                width: clamp(118px, 15.5vw, 148px);
+                height: clamp(44px, 8svh, 58px);
+                object-fit: contain;
+                transform: translateX(-50%);
+                z-index: 4;
+            }
         }
 
         @supports (-webkit-touch-callout: none) {
@@ -805,6 +828,20 @@
                     object-fit: contain;
                     transform: translate(-50%, -50%);
                     z-index: 4;
+                }
+
+                .dpad-wrap {
+                    width: clamp(146px, min(24vw, 42svh), 178px);
+                    justify-self: center;
+                    margin-right: 0;
+                }
+
+                .face-buttons {
+                    width: clamp(126px, min(18.6vw, 34svh), 146px);
+                }
+
+                .face-action {
+                    width: clamp(46px, min(8.3vw, 13.6svh), 56px);
                 }
             }
         }
