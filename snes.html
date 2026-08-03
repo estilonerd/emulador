@@ -1062,17 +1062,29 @@
                 }
 
                 return {
-                    halfWidth: Math.min(34, Math.max(12, width ? width / 2 : 20)),
-                    halfHeight: Math.min(34, Math.max(12, height ? height / 2 : 20))
+                    halfWidth: Math.min(26, Math.max(10, width ? width / 2 : 18)),
+                    halfHeight: Math.min(26, Math.max(10, height ? height / 2 : 18))
                 };
             }
 
-            function contactIntersectsButton(x, y, size, button) {
+            function getButtonCoreRect(button) {
                 var rect = button.getBoundingClientRect();
-                return x + size.halfWidth >= rect.left &&
-                    x - size.halfWidth <= rect.right &&
-                    y + size.halfHeight >= rect.top &&
-                    y - size.halfHeight <= rect.bottom;
+                var inset = Math.min(rect.width, rect.height) * 0.22;
+
+                return {
+                    left: rect.left + inset,
+                    right: rect.right - inset,
+                    top: rect.top + inset,
+                    bottom: rect.bottom - inset
+                };
+            }
+
+            function contactIntersectsButtonCore(x, y, size, button) {
+                var core = getButtonCoreRect(button);
+                return x + size.halfWidth >= core.left &&
+                    x - size.halfWidth <= core.right &&
+                    y + size.halfHeight >= core.top &&
+                    y - size.halfHeight <= core.bottom;
             }
 
             function getFaceContactButtons(group, x, y, event, primaryButton) {
@@ -1087,7 +1099,7 @@
                     return {
                         button: item,
                         distance: Math.sqrt(dx * dx + dy * dy),
-                        active: item === primaryButton || contactIntersectsButton(x, y, size, item)
+                        active: item === primaryButton || contactIntersectsButtonCore(x, y, size, item)
                     };
                 }).filter(function(item) {
                     return item.active;
