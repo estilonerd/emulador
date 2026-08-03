@@ -1020,13 +1020,21 @@
             }
 
             function getMovingContactButtons(currentButtons, event) {
-                var firstButton = toButtonList(currentButtons)[0];
+                var current = toButtonList(currentButtons);
+                var firstButton = current[0];
                 var x = event && event.clientX;
                 var y = event && event.clientY;
                 var target = (typeof x === 'number' && typeof y === 'number') ? document.elementFromPoint(x, y) : null;
+                var targetButton = target && target.closest ? target.closest('[data-input]') : null;
                 var group = firstButton && firstButton.closest ? firstButton.closest('.face-buttons') : null;
                 group = group || (target && target.closest ? target.closest('.face-buttons') : null);
-                if (!group || typeof x !== 'number' || typeof y !== 'number') return [];
+                if (!group || typeof x !== 'number' || typeof y !== 'number') {
+                    if (!targetButton) return [];
+                    if (firstButton && firstButton.closest && firstButton.closest('.dpad-wrap')) {
+                        return targetButton.closest('.dpad-wrap') ? [targetButton] : [];
+                    }
+                    return targetButton.closest('.face-buttons') ? [] : [targetButton];
+                }
 
                 var measuredWidth = event && event.width ? event.width : 0;
                 var measuredHeight = event && event.height ? event.height : 0;
@@ -1563,7 +1571,9 @@
 
                 button.addEventListener('lostpointercapture', function(event) {
                     if (!shouldHandlePointerEvent(event)) return;
-                    release(button, event);
+                    if (!activePointers[event.pointerId]) {
+                        release(button, event);
+                    }
                 });
             });
 
@@ -1589,7 +1599,9 @@
 
                 group.addEventListener('lostpointercapture', function(event) {
                     if (!shouldHandlePointerEvent(event)) return;
-                    release(null, event);
+                    if (!activePointers[event.pointerId]) {
+                        release(null, event);
+                    }
                 });
             });
 
@@ -1614,7 +1626,9 @@
 
             document.querySelector('.controls').addEventListener('touchend', function(event) {
                 if (usingPointerTouch) {
-                    releaseAllPointers();
+                    if (!event.touches || event.touches.length === 0) {
+                        releaseAllPointers();
+                    }
                     return;
                 }
                 event.preventDefault();
@@ -1623,7 +1637,9 @@
 
             document.querySelector('.controls').addEventListener('touchcancel', function(event) {
                 if (usingPointerTouch) {
-                    releaseAllPointers();
+                    if (!event.touches || event.touches.length === 0) {
+                        releaseAllPointers();
+                    }
                     return;
                 }
                 event.preventDefault();
