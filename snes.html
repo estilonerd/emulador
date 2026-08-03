@@ -1058,40 +1058,38 @@
                 var isTouch = event && (event.pointerType === 'touch' || event.isTouch);
 
                 if (!isTouch) {
-                    return { halfWidth: 1, halfHeight: 1 };
+                    return { radius: 1 };
                 }
 
                 return {
-                    halfWidth: Math.min(26, Math.max(10, width ? width / 2 : 18)),
-                    halfHeight: Math.min(26, Math.max(10, height ? height / 2 : 18))
+                    radius: Math.min(7, Math.max(3, Math.max(width, height) ? Math.max(width, height) * 0.12 : 5))
                 };
             }
 
-            function getButtonCoreRect(button) {
+            function contactTouchesButtonFace(x, y, size, button) {
                 var rect = button.getBoundingClientRect();
-                var inset = Math.min(rect.width, rect.height) * 0.22;
+                var centerX = rect.left + rect.width / 2;
+                var centerY = rect.top + rect.height / 2;
+                var buttonRadius = Math.min(rect.width, rect.height) / 2;
+                var dx = x - centerX;
+                var dy = y - centerY;
 
-                return {
-                    left: rect.left + inset,
-                    right: rect.right - inset,
-                    top: rect.top + inset,
-                    bottom: rect.bottom - inset
-                };
+                return Math.sqrt(dx * dx + dy * dy) <= buttonRadius + size.radius;
             }
 
-            function contactIntersectsButtonCore(x, y, size, button) {
-                var core = getButtonCoreRect(button);
-                return x + size.halfWidth >= core.left &&
-                    x - size.halfWidth <= core.right &&
-                    y + size.halfHeight >= core.top &&
-                    y - size.halfHeight <= core.bottom;
+            function getActionFamily(button) {
+                var input = button && button.getAttribute('data-input');
+
+                if (input === '1' || input === '0') return 'yb';
+                if (input === '9' || input === '8') return 'xa';
+                return '';
             }
 
             function getFaceContactButtons(group, x, y, event, primaryButton) {
                 var size = getTouchSize(event);
                 var buttons = Array.prototype.slice.call(group.querySelectorAll('[data-input]'));
 
-                return buttons.map(function(item) {
+                var activeButtons = buttons.map(function(item) {
                     var rect = item.getBoundingClientRect();
                     var dx = x - (rect.left + rect.width / 2);
                     var dy = y - (rect.top + rect.height / 2);
@@ -1099,12 +1097,17 @@
                     return {
                         button: item,
                         distance: Math.sqrt(dx * dx + dy * dy),
-                        active: item === primaryButton || contactIntersectsButtonCore(x, y, size, item)
+                        active: item === primaryButton || contactTouchesButtonFace(x, y, size, item)
                     };
                 }).filter(function(item) {
                     return item.active;
                 }).sort(function(a, b) {
                     return a.distance - b.distance;
+                });
+                var family = activeButtons.length ? getActionFamily(activeButtons[0].button) : '';
+
+                return activeButtons.filter(function(item) {
+                    return getActionFamily(item.button) === family;
                 }).slice(0, 2).map(function(item) {
                     return item.button;
                 });
