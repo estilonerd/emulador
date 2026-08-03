@@ -1150,6 +1150,38 @@
                 return [pointButton].filter(Boolean).slice(0, 1);
             }
 
+            function getTouchGroup(touch) {
+                var target = getTargetFromPoint(touch.clientX, touch.clientY);
+                var button = getButtonFromTarget(target);
+
+                return (button && button.closest && button.closest('.face-buttons')) ||
+                    (target && target.closest ? target.closest('.face-buttons') : null) ||
+                    (button && button.closest && button.closest('.dpad-wrap')) ||
+                    (target && target.closest ? target.closest('.dpad-wrap') : null);
+            }
+
+            function getPreviousButtonsForTouch(touch, previousPointers) {
+                var group = getTouchGroup(touch);
+                if (!group) return null;
+
+                var pointerIds = Object.keys(previousPointers);
+
+                for (var index = 0; index < pointerIds.length; index += 1) {
+                    var buttons = toButtonList(previousPointers[pointerIds[index]]);
+                    var firstButton = buttons[0];
+
+                    if (firstButton && firstButton.closest && firstButton.closest('.face-buttons') === group) {
+                        return buttons;
+                    }
+
+                    if (firstButton && firstButton.closest && firstButton.closest('.dpad-wrap') === group) {
+                        return buttons;
+                    }
+                }
+
+                return null;
+            }
+
             function getPressedButtonsFromContacts() {
                 var next = [];
 
@@ -1285,7 +1317,8 @@
                 if (event && event.touches && event.touches.length) {
                     Array.prototype.forEach.call(event.touches, function(touch) {
                         var pointerId = 'touch-' + touch.identifier;
-                        activePointers[pointerId] = getTouchButtons(touch, previousPointers[pointerId]);
+                        var previousButtons = previousPointers[pointerId] || getPreviousButtonsForTouch(touch, previousPointers);
+                        activePointers[pointerId] = getTouchButtons(touch, previousButtons);
                     });
                 }
 
