@@ -1,0 +1,164 @@
+.estilo-modal-open {
+    overflow: hidden !important;
+}
+
+.estilo-modal-open .emulator-shell {
+    filter: blur(6px);
+    transform: scale(0.992);
+    pointer-events: none;
+    transition: filter 180ms ease, transform 180ms ease;
+}
+
+.estilo-profile-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    min-width: 0;
+    min-height: 100dvh;
+    padding:
+        max(18px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+    background: rgba(8, 4, 18, 0.58);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: manipulation;
+}
+
+.estilo-profile-overlay[hidden] {
+    display: none;
+}
+
+.estilo-profile-dialog {
+    width: min(100%, 390px);
+    max-height: calc(100dvh - max(36px, env(safe-area-inset-top)) - max(36px, env(safe-area-inset-bottom)));
+    min-width: 0;
+    padding: clamp(20px, 5vw, 26px);
+    border: 1px solid rgba(136, 255, 85, 0.24);
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at 20% 0%, rgba(136, 255, 85, 0.2), transparent 38%),
+        linear-gradient(160deg, rgba(80, 15, 190, 0.98), rgba(29, 8, 68, 0.98) 58%, rgba(12, 6, 30, 0.98));
+    box-shadow: 0 26px 76px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    color: #fff;
+    text-align: center;
+    overflow-y: auto;
+    animation: estilo-modal-enter 180ms ease-out both;
+}
+
+.estilo-profile-avatar {
+    width: clamp(86px, 24vw, 112px);
+    aspect-ratio: 1;
+    margin: 0 auto 16px;
+    border: 3px solid rgba(136, 255, 85, 0.86);
+    border-radius: 50%;
+    background: linear-gradient(145deg, #6d27e8, #27105f);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.estilo-profile-avatar::before {
+    content: "EN";
+    color: #8cff55;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.estilo-profile-avatar img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.estilo-profile-avatar img.is-hidden {
+    display: none;
+}
+
+.estilo-profile-title {
+    margin: 0;
+    font-size: clamp(25px, 7vw, 34px);
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.estilo-profile-bio {
+    max-width: 31ch;
+    margin: 12px auto 20px;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: clamp(15px, 4vw, 17px);
+    line-height: 1.45;
+}
+
+.estilo-profile-actions {
+    display: grid;
+    gap: 10px;
+}
+
+.estilo-profile-instagram,
+.estilo-profile-ok {
+    min-height: 48px;
+    width: 100%;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1.1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.estilo-profile-instagram {
+    border: 1px solid rgba(136, 255, 85, 0.72);
+    background: #8cff55;
+    color: #1f1243;
+}
+
+.estilo-profile-ok {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.estilo-profile-instagram:focus-visible,
+.estilo-profile-ok:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+}
+
+@keyframes estilo-modal-enter {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 360px) {
+    .estilo-profile-overlay {
+        padding-inline: max(12px, env(safe-area-inset-left));
+    }
+
+    .estilo-profile-dialog {
+        border-radius: 18px;
+        padding: 18px;
+    }
+}
