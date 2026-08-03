@@ -681,9 +681,10 @@
             .dpad-wrap {
                 grid-column: 1;
                 width: clamp(158px, min(26vw, 46svh), 194px);
-                justify-self: end;
-                margin-right: clamp(16px, 2vw, 20px);
+                justify-self: center;
+                margin-right: 0;
                 pointer-events: auto;
+                transform: translateY(clamp(18px, 2.8vw, 24px));
             }
 
             .face-buttons {
@@ -800,9 +801,9 @@
                 display: block;
                 position: fixed;
                 left: calc(env(safe-area-inset-left) + 10px + (clamp(174px, 27vw, 212px) / 2));
-                bottom: max(38px, calc(env(safe-area-inset-bottom) + 32px));
-                width: clamp(118px, 15.5vw, 148px);
-                height: clamp(44px, 8svh, 58px);
+                bottom: max(47px, calc(env(safe-area-inset-bottom) + 42px));
+                width: clamp(96px, 12.5vw, 116px);
+                height: clamp(30px, 5.4svh, 34px);
                 object-fit: contain;
                 transform: translateX(-50%);
                 z-index: 4;
