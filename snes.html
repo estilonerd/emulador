@@ -945,7 +945,7 @@
         (function() {
             var activePointers = {};
             var activeTouches = {};
-            var buttonPressCounts = new WeakMap();
+            var pressedButtons = [];
             var usingPointerTouch = false;
 
             function shouldHandlePointerEvent(event) {
@@ -977,10 +977,6 @@
                 var input = button && button.getAttribute('data-input');
                 if (!input) return;
 
-                var count = buttonPressCounts.get(button) || 0;
-                buttonPressCounts.set(button, count + 1);
-                if (count > 0) return;
-
                 button.classList.add('is-pressed');
                 setDpadState(button, true);
                 setInput(input, true);
@@ -990,13 +986,6 @@
                 var input = button && button.getAttribute('data-input');
                 if (!button || !input) return;
 
-                var count = buttonPressCounts.get(button) || 0;
-                if (count > 1) {
-                    buttonPressCounts.set(button, count - 1);
-                    return;
-                }
-
-                buttonPressCounts.delete(button);
                 button.classList.remove('is-pressed');
                 setDpadState(button, false);
                 setInput(input, false);
@@ -1007,74 +996,61 @@
                 return Array.isArray(value) ? value : [value];
             }
 
-            function startButtons(buttons) {
-                toButtonList(buttons).forEach(startButton);
+            function addUniqueButton(list, button) {
+                if (button && list.indexOf(button) === -1) {
+                    list.push(button);
+                }
             }
 
-            function stopButtons(buttons) {
-                toButtonList(buttons).forEach(stopButton);
+            function getButtonFromPoint(x, y) {
+                if (typeof x !== 'number' || typeof y !== 'number') return null;
+
+                var target = document.elementFromPoint(x, y);
+                var button = target && target.closest ? target.closest('[data-input]') : null;
+                return button && button.closest('.controls') ? button : null;
             }
 
-            function getContactButtons(button) {
-                return button ? [button] : [];
-            }
-
-            function getMovingContactButtons(currentButtons, event) {
-                var current = toButtonList(currentButtons);
-                var firstButton = current[0];
+            function getContactButtons(button, event) {
                 var x = event && event.clientX;
                 var y = event && event.clientY;
-                var target = (typeof x === 'number' && typeof y === 'number') ? document.elementFromPoint(x, y) : null;
-                var targetButton = target && target.closest ? target.closest('[data-input]') : null;
-                var group = firstButton && firstButton.closest ? firstButton.closest('.face-buttons') : null;
-                group = group || (target && target.closest ? target.closest('.face-buttons') : null);
-                if (!group || typeof x !== 'number' || typeof y !== 'number') {
-                    if (!targetButton) return [];
-                    if (firstButton && firstButton.closest && firstButton.closest('.dpad-wrap')) {
-                        return targetButton.closest('.dpad-wrap') ? [targetButton] : [];
-                    }
-                    return targetButton.closest('.face-buttons') ? [] : [targetButton];
-                }
 
-                var measuredWidth = event && event.width ? event.width : 0;
-                var measuredHeight = event && event.height ? event.height : 0;
-                var contactPadding = Math.min(34, Math.max(8, Math.max(measuredWidth, measuredHeight) * 0.58));
-                var buttons = Array.prototype.slice.call(group.querySelectorAll('[data-input]'));
-
-                return buttons.map(function(item) {
-                    var rect = item.getBoundingClientRect();
-                    var dx = x - (rect.left + rect.width / 2);
-                    var dy = y - (rect.top + rect.height / 2);
-                    var distance = Math.sqrt(dx * dx + dy * dy);
-                    var active = x >= rect.left - contactPadding &&
-                        x <= rect.right + contactPadding &&
-                        y >= rect.top - contactPadding &&
-                        y <= rect.bottom + contactPadding;
-                    return { button: item, distance: distance, active: active };
-                }).filter(function(item) {
-                    return item.active;
-                }).sort(function(a, b) {
-                    return a.distance - b.distance;
-                }).slice(0, 2).map(function(item) {
-                    return item.button;
-                });
+                return [getButtonFromPoint(x, y) || button].filter(Boolean).slice(0, 1);
             }
 
-            function syncActiveButtons(currentButtons, nextButtons) {
-                var current = toButtonList(currentButtons);
-                var next = toButtonList(nextButtons).slice(0, 2);
+            function getPressedButtonsFromContacts() {
+                var next = [];
 
-                current.forEach(function(button) {
+                Object.keys(activePointers).forEach(function(pointerId) {
+                    toButtonList(activePointers[pointerId]).forEach(function(button) {
+                        addUniqueButton(next, button);
+                    });
+                });
+
+                Object.keys(activeTouches).forEach(function(identifier) {
+                    toButtonList(activeTouches[identifier]).forEach(function(button) {
+                        addUniqueButton(next, button);
+                    });
+                });
+
+                return next;
+            }
+
+            function syncPressedButtons() {
+                var next = getPressedButtonsFromContacts();
+
+                pressedButtons.forEach(function(button) {
                     if (next.indexOf(button) === -1) {
                         stopButton(button);
                     }
                 });
+
                 next.forEach(function(button) {
-                    if (current.indexOf(button) === -1) {
+                    if (pressedButtons.indexOf(button) === -1) {
                         startButton(button);
                     }
                 });
-                return next;
+
+                pressedButtons = next;
             }
 
             function press(button, event) {
@@ -1085,7 +1061,6 @@
                     if (event.pointerType === 'touch') {
                         usingPointerTouch = true;
                     }
-                    if (activePointers[event.pointerId]) return;
                     activePointers[event.pointerId] = buttons;
                     var captureTarget = button || (event.currentTarget && event.currentTarget.setPointerCapture ? event.currentTarget : null);
                     try {
@@ -1093,85 +1068,70 @@
                     } catch (error) {}
                 }
 
-                startButtons(buttons);
+                syncPressedButtons();
             }
 
             function release(button, event) {
-                var buttons = button;
                 if (event && event.pointerId !== undefined && activePointers[event.pointerId]) {
-                    buttons = activePointers[event.pointerId];
-                }
-                if (!buttons) return;
-
-                if (event && event.pointerId !== undefined) {
                     delete activePointers[event.pointerId];
+                    syncPressedButtons();
+                    return;
                 }
 
-                stopButtons(buttons);
+                if (!button) return;
+
+                Object.keys(activePointers).forEach(function(pointerId) {
+                    activePointers[pointerId] = toButtonList(activePointers[pointerId]).filter(function(item) {
+                        return item !== button;
+                    });
+                });
+
+                Object.keys(activeTouches).forEach(function(identifier) {
+                    activeTouches[identifier] = toButtonList(activeTouches[identifier]).filter(function(item) {
+                        return item !== button;
+                    });
+                });
+
+                syncPressedButtons();
             }
 
             function movePointer(event) {
                 if (!event || event.pointerId === undefined || !activePointers[event.pointerId]) return;
-                activePointers[event.pointerId] = syncActiveButtons(
-                    activePointers[event.pointerId],
-                    getMovingContactButtons(activePointers[event.pointerId], event)
-                );
+                activePointers[event.pointerId] = getContactButtons(null, event);
+                syncPressedButtons();
             }
 
             function releaseAllPointers() {
-                Object.keys(activePointers).forEach(function(pointerId) {
-                    release(activePointers[pointerId], { pointerId: pointerId });
-                });
+                activePointers = {};
+                syncPressedButtons();
             }
 
             function getTouchButtons(touch) {
-                var target = document.elementFromPoint(touch.clientX, touch.clientY);
-                var button = target && target.closest ? target.closest('[data-input]') : null;
-                return getContactButtons(button);
-            }
-
-            function getMovingTouchButtons(currentButtons, touch) {
-                return getMovingContactButtons(currentButtons, {
+                return getContactButtons(null, {
                     clientX: touch.clientX,
-                    clientY: touch.clientY,
-                    width: (touch.radiusX || 0) * 2,
-                    height: (touch.radiusY || 0) * 2
+                    clientY: touch.clientY
                 });
             }
 
             function pressTouch(touch) {
                 var buttons = getTouchButtons(touch);
-                if (!buttons.length) return;
-                if (activeTouches[touch.identifier]) return;
                 activeTouches[touch.identifier] = buttons;
-                startButtons(buttons);
+                syncPressedButtons();
             }
 
             function moveTouch(touch) {
-                if (!activeTouches[touch.identifier]) {
-                    pressTouch(touch);
-                    return;
-                }
-                var previousButtons = activeTouches[touch.identifier];
-                activeTouches[touch.identifier] = syncActiveButtons(
-                    previousButtons,
-                    getMovingTouchButtons(previousButtons, touch)
-                );
+                activeTouches[touch.identifier] = getTouchButtons(touch);
+                syncPressedButtons();
             }
 
             function releaseTouch(touch) {
-                var buttons = activeTouches[touch.identifier];
-                if (!buttons) return;
                 delete activeTouches[touch.identifier];
-                stopButtons(buttons);
+                syncPressedButtons();
             }
 
             function releaseAllTouches() {
-                Object.keys(activeTouches).forEach(function(identifier) {
-                    var buttons = activeTouches[identifier];
-                    delete activeTouches[identifier];
-                    stopButtons(buttons);
-                });
+                activeTouches = {};
+                syncPressedButtons();
             }
 
             function releaseChangedTouches(event) {
@@ -1180,6 +1140,18 @@
                     return;
                 }
                 releaseAllTouches();
+            }
+
+            function syncPointerTouches(event) {
+                activePointers = {};
+
+                if (event && event.touches && event.touches.length) {
+                    Array.prototype.forEach.call(event.touches, function(touch) {
+                        activePointers['touch-' + touch.identifier] = getTouchButtons(touch);
+                    });
+                }
+
+                syncPressedButtons();
             }
 
             function resumeGameIfPaused() {
@@ -1619,30 +1591,35 @@
             }, { passive: false });
 
             document.querySelector('.controls').addEventListener('touchmove', function(event) {
-                if (usingPointerTouch) return;
                 event.preventDefault();
+
+                if (usingPointerTouch) {
+                    syncPointerTouches(event);
+                    return;
+                }
+
                 Array.prototype.forEach.call(event.changedTouches, moveTouch);
             }, { passive: false });
 
             document.querySelector('.controls').addEventListener('touchend', function(event) {
+                event.preventDefault();
+
                 if (usingPointerTouch) {
-                    if (!event.touches || event.touches.length === 0) {
-                        releaseAllPointers();
-                    }
+                    syncPointerTouches(event);
                     return;
                 }
-                event.preventDefault();
+
                 releaseChangedTouches(event);
             }, { passive: false });
 
             document.querySelector('.controls').addEventListener('touchcancel', function(event) {
+                event.preventDefault();
+
                 if (usingPointerTouch) {
-                    if (!event.touches || event.touches.length === 0) {
-                        releaseAllPointers();
-                    }
+                    syncPointerTouches(event);
                     return;
                 }
-                event.preventDefault();
+
                 releaseChangedTouches(event);
             }, { passive: false });
 
@@ -1663,11 +1640,9 @@
             });
 
             window.addEventListener('blur', function() {
-                document.querySelectorAll('[data-input].is-pressed').forEach(function(button) {
-                    release(button);
-                });
                 activePointers = {};
                 activeTouches = {};
+                syncPressedButtons();
             });
 
             document.addEventListener('contextmenu', function(event) {
