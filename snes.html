@@ -1042,19 +1042,75 @@
                 }
             }
 
-            function getButtonFromPoint(x, y) {
+            function getTargetFromPoint(x, y) {
                 if (typeof x !== 'number' || typeof y !== 'number') return null;
+                return document.elementFromPoint(x, y);
+            }
 
-                var target = document.elementFromPoint(x, y);
+            function getButtonFromTarget(target) {
                 var button = target && target.closest ? target.closest('[data-input]') : null;
                 return button && button.closest('.controls') ? button : null;
+            }
+
+            function getTouchSize(event) {
+                var width = Number(event && (event.width || event.radiusX * 2)) || 0;
+                var height = Number(event && (event.height || event.radiusY * 2)) || 0;
+                var isTouch = event && (event.pointerType === 'touch' || event.isTouch);
+
+                if (!isTouch) {
+                    return { halfWidth: 1, halfHeight: 1 };
+                }
+
+                return {
+                    halfWidth: Math.min(34, Math.max(12, width ? width / 2 : 20)),
+                    halfHeight: Math.min(34, Math.max(12, height ? height / 2 : 20))
+                };
+            }
+
+            function contactIntersectsButton(x, y, size, button) {
+                var rect = button.getBoundingClientRect();
+                return x + size.halfWidth >= rect.left &&
+                    x - size.halfWidth <= rect.right &&
+                    y + size.halfHeight >= rect.top &&
+                    y - size.halfHeight <= rect.bottom;
+            }
+
+            function getFaceContactButtons(group, x, y, event, primaryButton) {
+                var size = getTouchSize(event);
+                var buttons = Array.prototype.slice.call(group.querySelectorAll('[data-input]'));
+
+                return buttons.map(function(item) {
+                    var rect = item.getBoundingClientRect();
+                    var dx = x - (rect.left + rect.width / 2);
+                    var dy = y - (rect.top + rect.height / 2);
+
+                    return {
+                        button: item,
+                        distance: Math.sqrt(dx * dx + dy * dy),
+                        active: item === primaryButton || contactIntersectsButton(x, y, size, item)
+                    };
+                }).filter(function(item) {
+                    return item.active;
+                }).sort(function(a, b) {
+                    return a.distance - b.distance;
+                }).slice(0, 2).map(function(item) {
+                    return item.button;
+                });
             }
 
             function getContactButtons(button, event) {
                 var x = event && event.clientX;
                 var y = event && event.clientY;
+                var target = getTargetFromPoint(x, y);
+                var pointButton = getButtonFromTarget(target) || button;
+                var faceGroup = pointButton && pointButton.closest ? pointButton.closest('.face-buttons') : null;
+                faceGroup = faceGroup || (target && target.closest ? target.closest('.face-buttons') : null);
 
-                return [getButtonFromPoint(x, y) || button].filter(Boolean).slice(0, 1);
+                if (faceGroup && typeof x === 'number' && typeof y === 'number') {
+                    return getFaceContactButtons(faceGroup, x, y, event, pointButton);
+                }
+
+                return [pointButton].filter(Boolean).slice(0, 1);
             }
 
             function getPressedButtonsFromContacts() {
@@ -1149,7 +1205,10 @@
             function getTouchButtons(touch) {
                 return getContactButtons(null, {
                     clientX: touch.clientX,
-                    clientY: touch.clientY
+                    clientY: touch.clientY,
+                    radiusX: touch.radiusX || 0,
+                    radiusY: touch.radiusY || 0,
+                    isTouch: true
                 });
             }
 
