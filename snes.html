@@ -1119,10 +1119,18 @@
                     return a.distance - b.distance;
                 });
                 var family = getActionFamily(primaryButton) || (activeButtons.length ? getActionFamily(activeButtons[0].button) : '');
-
-                return activeButtons.filter(function(item) {
+                var familyButtons = activeButtons.filter(function(item) {
                     return getActionFamily(item.button) === family;
-                }).slice(0, 2).map(function(item) {
+                });
+                var primaryItem = familyButtons.filter(function(item) {
+                    return item.button === primaryButton;
+                })[0];
+                var secondaryItems = familyButtons.filter(function(item) {
+                    return item.button !== primaryButton;
+                });
+                var orderedButtons = primaryItem ? [primaryItem].concat(secondaryItems) : familyButtons;
+
+                return orderedButtons.slice(0, 2).map(function(item) {
                     return item.button;
                 });
             }
@@ -1271,12 +1279,13 @@
             }
 
             function syncPointerTouches(event) {
+                var previousPointers = activePointers;
                 activePointers = {};
 
                 if (event && event.touches && event.touches.length) {
                     Array.prototype.forEach.call(event.touches, function(touch) {
                         var pointerId = 'touch-' + touch.identifier;
-                        activePointers[pointerId] = getTouchButtons(touch, activePointers[pointerId]);
+                        activePointers[pointerId] = getTouchButtons(touch, previousPointers[pointerId]);
                     });
                 }
 
