@@ -1087,6 +1087,18 @@
                 return '';
             }
 
+            function getAnchoredFaceButton(group, currentButtons) {
+                var current = toButtonList(currentButtons);
+
+                for (var index = 0; index < current.length; index += 1) {
+                    if (current[index] && current[index].closest && current[index].closest('.face-buttons') === group) {
+                        return current[index];
+                    }
+                }
+
+                return null;
+            }
+
             function getFaceContactButtons(group, x, y, event, primaryButton) {
                 var size = getTouchSize(event);
                 var buttons = Array.prototype.slice.call(group.querySelectorAll('[data-input]'));
@@ -1106,7 +1118,7 @@
                 }).sort(function(a, b) {
                     return a.distance - b.distance;
                 });
-                var family = activeButtons.length ? getActionFamily(activeButtons[0].button) : '';
+                var family = getActionFamily(primaryButton) || (activeButtons.length ? getActionFamily(activeButtons[0].button) : '');
 
                 return activeButtons.filter(function(item) {
                     return getActionFamily(item.button) === family;
@@ -1115,7 +1127,7 @@
                 });
             }
 
-            function getContactButtons(button, event) {
+            function getContactButtons(button, event, currentButtons) {
                 var x = event && event.clientX;
                 var y = event && event.clientY;
                 var target = getTargetFromPoint(x, y);
@@ -1124,7 +1136,7 @@
                 faceGroup = faceGroup || (target && target.closest ? target.closest('.face-buttons') : null);
 
                 if (faceGroup && typeof x === 'number' && typeof y === 'number') {
-                    return getFaceContactButtons(faceGroup, x, y, event, pointButton);
+                    return getFaceContactButtons(faceGroup, x, y, event, getAnchoredFaceButton(faceGroup, currentButtons) || pointButton);
                 }
 
                 return [pointButton].filter(Boolean).slice(0, 1);
@@ -1210,7 +1222,7 @@
 
             function movePointer(event) {
                 if (!event || event.pointerId === undefined || !activePointers[event.pointerId]) return;
-                activePointers[event.pointerId] = getContactButtons(null, event);
+                activePointers[event.pointerId] = getContactButtons(null, event, activePointers[event.pointerId]);
                 syncPressedButtons();
             }
 
@@ -1219,14 +1231,14 @@
                 syncPressedButtons();
             }
 
-            function getTouchButtons(touch) {
+            function getTouchButtons(touch, currentButtons) {
                 return getContactButtons(null, {
                     clientX: touch.clientX,
                     clientY: touch.clientY,
                     radiusX: touch.radiusX || 0,
                     radiusY: touch.radiusY || 0,
                     isTouch: true
-                });
+                }, currentButtons);
             }
 
             function pressTouch(touch) {
@@ -1236,7 +1248,7 @@
             }
 
             function moveTouch(touch) {
-                activeTouches[touch.identifier] = getTouchButtons(touch);
+                activeTouches[touch.identifier] = getTouchButtons(touch, activeTouches[touch.identifier]);
                 syncPressedButtons();
             }
 
@@ -1263,7 +1275,8 @@
 
                 if (event && event.touches && event.touches.length) {
                     Array.prototype.forEach.call(event.touches, function(touch) {
-                        activePointers['touch-' + touch.identifier] = getTouchButtons(touch);
+                        var pointerId = 'touch-' + touch.identifier;
+                        activePointers[pointerId] = getTouchButtons(touch, activePointers[pointerId]);
                     });
                 }
 
