@@ -1215,10 +1215,26 @@
                 }
             }
 
-            function toggleMenu() {
+            var pendingMenuRetry = null;
+
+            function toggleMenu(attempt) {
                 var shell = document.querySelector('.emulator-shell');
                 var menu = document.querySelector('#game .ejs_menu_bar');
-                if (!shell || !menu) return;
+                if (!shell) return;
+
+                if (!menu) {
+                    if ((attempt || 0) < 12) {
+                        window.clearTimeout(pendingMenuRetry);
+                        pendingMenuRetry = window.setTimeout(function() {
+                            toggleMenu((attempt || 0) + 1);
+                        }, 100);
+                    }
+
+                    return;
+                }
+
+                window.clearTimeout(pendingMenuRetry);
+                pendingMenuRetry = null;
 
                 var shouldOpen = !shell.classList.contains('show-native-menu');
 
@@ -1233,6 +1249,20 @@
                 menu.style.setProperty('display', shouldOpen ? 'flex' : 'none', 'important');
                 menu.style.setProperty('opacity', shouldOpen ? '1' : '0', 'important');
                 menu.style.setProperty('pointer-events', shouldOpen ? 'auto' : 'none', 'important');
+            }
+
+            var lastMenuActivation = 0;
+
+            function activateMenu(event) {
+                if (event) {
+                    event.preventDefault();
+                }
+
+                var now = Date.now();
+                if (now - lastMenuActivation < 350) return;
+                lastMenuActivation = now;
+
+                toggleMenu();
             }
 
             document.querySelectorAll('[data-input]').forEach(function(button) {
@@ -1329,10 +1359,10 @@
                 releaseChangedTouches(event);
             }, { passive: false });
 
-            document.querySelector('[data-menu]').addEventListener('click', function(event) {
-                event.preventDefault();
-                toggleMenu();
-            });
+            var menuButton = document.querySelector('[data-menu]');
+            menuButton.addEventListener('pointerup', activateMenu);
+            menuButton.addEventListener('touchend', activateMenu, { passive: false });
+            menuButton.addEventListener('click', activateMenu);
 
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'Escape') {
