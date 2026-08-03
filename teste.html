@@ -1201,6 +1201,10 @@
                 }
             }
 
+            function returnToGameFromMenu() {
+                closeMenu();
+            }
+
             function ensureBackButton() {
                 var menu = document.querySelector('#game .ejs_menu_bar');
                 if (!menu || menu.querySelector('.custom-menu-back')) return;
@@ -1211,7 +1215,7 @@
                 button.textContent = 'Voltar ao jogo';
                 button.addEventListener('click', function(event) {
                     event.preventDefault();
-                    closeMenu();
+                    returnToGameFromMenu();
                 });
 
                 menu.insertBefore(button, menu.firstChild);
@@ -1412,6 +1416,7 @@
             }
 
             var lastMenuActivation = 0;
+            var lastMenuBackdropClose = 0;
 
             function activateMenu(event) {
                 if (event) {
@@ -1423,6 +1428,37 @@
                 lastMenuActivation = now;
 
                 toggleMenu();
+            }
+
+            function handleMenuBackdropInteraction(event) {
+                var shell = document.querySelector('.emulator-shell.show-native-menu');
+                if (!shell) return;
+
+                var target = event.target;
+                if (target && target.closest && (target.closest('#game .ejs_menu_bar') || target.closest('[data-menu]'))) {
+                    return;
+                }
+
+                if (event.cancelable) {
+                    event.preventDefault();
+                }
+
+                event.stopPropagation();
+                lastMenuBackdropClose = Date.now();
+                returnToGameFromMenu();
+            }
+
+            function suppressMenuBackdropClick(event) {
+                if (Date.now() - lastMenuBackdropClose > 350) {
+                    handleMenuBackdropInteraction(event);
+                    return;
+                }
+
+                if (event.cancelable) {
+                    event.preventDefault();
+                }
+
+                event.stopPropagation();
             }
 
             document.querySelectorAll('[data-input]').forEach(function(button) {
@@ -1523,6 +1559,10 @@
             menuButton.addEventListener('pointerup', activateMenu);
             menuButton.addEventListener('touchend', activateMenu, { passive: false });
             menuButton.addEventListener('click', activateMenu);
+
+            document.addEventListener('pointerdown', handleMenuBackdropInteraction, true);
+            document.addEventListener('touchstart', handleMenuBackdropInteraction, { capture: true, passive: false });
+            document.addEventListener('click', suppressMenuBackdropClick, true);
 
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'Escape') {
