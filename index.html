@@ -1,0 +1,335 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emulador SNES - Links permanentes</title>
+    <style>
+        :root {
+            --bg: #f0eee8;
+            --panel: #ffffff;
+            --panel-soft: #f8f8f6;
+            --line: rgba(32, 33, 38, 0.16);
+            --text: #202126;
+            --muted: rgba(32, 33, 38, 0.68);
+            --accent: #c92836;
+            --focus: #1b6eea;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            min-height: 100svh;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .page {
+            width: min(1120px, 100%);
+            margin: 0 auto;
+            padding: clamp(18px, 4vw, 36px);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: clamp(22px, 5vw, 42px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-mark {
+            width: 44px;
+            height: 44px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            background:
+                linear-gradient(90deg, transparent 31%, rgba(255, 255, 255, 0.88) 31% 42%, transparent 42% 58%, rgba(255, 255, 255, 0.88) 58% 69%, transparent 69%),
+                linear-gradient(180deg, #d8d8d8, #a8a8a8);
+            box-shadow: inset 0 0 0 5px #2b2f38;
+            flex: 0 0 auto;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: clamp(24px, 6vw, 44px);
+            line-height: 1;
+            letter-spacing: 0;
+        }
+
+        .brand p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .gba-link {
+            min-height: 42px;
+            padding: 11px 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+            gap: 14px;
+        }
+
+        .game-card {
+            display: grid;
+            gap: 14px;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: linear-gradient(180deg, var(--panel-soft), var(--panel));
+        }
+
+        .game-title {
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            margin: 0;
+            font-size: 20px;
+            line-height: 1.15;
+        }
+
+        .permalink {
+            min-width: 0;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            background: #eceff3;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+            user-select: text;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+        }
+
+        .play-link,
+        .copy-button {
+            min-height: 44px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .play-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 14px;
+            background: var(--accent);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .copy-button {
+            width: auto;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            background: #2d3038;
+            color: #fff;
+        }
+
+        .play-link:hover,
+        .copy-button:hover {
+            filter: brightness(1.08);
+        }
+
+        .play-link:focus-visible,
+        .copy-button:focus-visible,
+        .gba-link:focus-visible {
+            outline: 3px solid var(--focus);
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 620px) {
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .gba-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .page {
+                padding-inline: 14px;
+            }
+
+            .brand-mark {
+                width: 38px;
+                height: 38px;
+            }
+
+            .game-card {
+                padding: 14px;
+            }
+
+            .actions {
+                grid-template-columns: 1fr;
+            }
+
+            .copy-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="topbar">
+            <div class="brand">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <div>
+                    <h1>SNES</h1>
+                    <p>Links permanentes dos jogos</p>
+                </div>
+            </div>
+            <a class="gba-link" href="gba.html?rom=pokemon">Abrir GBA</a>
+        </header>
+
+        <section class="game-grid" aria-label="Jogos do SNES">
+            <article class="game-card">
+                <h2 class="game-title">Aladdin</h2>
+                <p class="permalink">https://estilonerd.github.io/emulador/snes.html?rom=aladdin</p>
+                <div class="actions">
+                    <a class="play-link" href="snes.html?rom=aladdin">Jogar</a>
+                    <button class="copy-button" type="button" data-copy="https://estilonerd.github.io/emulador/snes.html?rom=aladdin" aria-label="Copiar link de Aladdin">Copiar</button>
+                </div>
+            </article>
+
+            <article class="game-card">
+                <h2 class="game-title">Donkey Kong Country 2</h2>
+                <p class="permalink">https://estilonerd.github.io/emulador/snes.html?rom=donkeykong2</p>
+                <div class="actions">
+                    <a class="play-link" href="snes.html?rom=donkeykong2">Jogar</a>
+                    <button class="copy-button" type="button" data-copy="https://estilonerd.github.io/emulador/snes.html?rom=donkeykong2" aria-label="Copiar link de Donkey Kong Country 2">Copiar</button>
+                </div>
+            </article>
+
+            <article class="game-card">
+                <h2 class="game-title">Rock n' Roll Racing</h2>
+                <p class="permalink">https://estilonerd.github.io/emulador/snes.html?rom=rocknrollracing</p>
+                <div class="actions">
+                    <a class="play-link" href="snes.html?rom=rocknrollracing">Jogar</a>
+                    <button class="copy-button" type="button" data-copy="https://estilonerd.github.io/emulador/snes.html?rom=rocknrollracing" aria-label="Copiar link de Rock n' Roll Racing">Copiar</button>
+                </div>
+            </article>
+
+            <article class="game-card">
+                <h2 class="game-title">Street Fighter II</h2>
+                <p class="permalink">https://estilonerd.github.io/emulador/snes.html?rom=streetfighter2</p>
+                <div class="actions">
+                    <a class="play-link" href="snes.html?rom=streetfighter2">Jogar</a>
+                    <button class="copy-button" type="button" data-copy="https://estilonerd.github.io/emulador/snes.html?rom=streetfighter2" aria-label="Copiar link de Street Fighter II">Copiar</button>
+                </div>
+            </article>
+
+            <article class="game-card">
+                <h2 class="game-title">Super Bomberman</h2>
+                <p class="permalink">https://estilonerd.github.io/emulador/snes.html?rom=superbomberman</p>
+                <div class="actions">
+                    <a class="play-link" href="snes.html?rom=superbomberman">Jogar</a>
+                    <button class="copy-button" type="button" data-copy="https://estilonerd.github.io/emulador/snes.html?rom=superbomberman" aria-label="Copiar link de Super Bomberman">Copiar</button>
+                </div>
+            </article>
+
+            <article class="game-card">
+                <h2 class="game-title">Super Mario World</h2>
+                <p class="permalink">https://estilonerd.github.io/emulador/snes.html?rom=supermarioworld</p>
+                <div class="actions">
+                    <a class="play-link" href="snes.html?rom=supermarioworld">Jogar</a>
+                    <button class="copy-button" type="button" data-copy="https://estilonerd.github.io/emulador/snes.html?rom=supermarioworld" aria-label="Copiar link de Super Mario World">Copiar</button>
+                </div>
+            </article>
+
+            <article class="game-card">
+                <h2 class="game-title">Top Gear</h2>
+                <p class="permalink">https://estilonerd.github.io/emulador/snes.html?rom=topgear</p>
+                <div class="actions">
+                    <a class="play-link" href="snes.html?rom=topgear">Jogar</a>
+                    <button class="copy-button" type="button" data-copy="https://estilonerd.github.io/emulador/snes.html?rom=topgear" aria-label="Copiar link de Top Gear">Copiar</button>
+                </div>
+            </article>
+
+            <article class="game-card">
+                <h2 class="game-title">Yoshi's Island</h2>
+                <p class="permalink">https://estilonerd.github.io/emulador/snes.html?rom=yoshiisland</p>
+                <div class="actions">
+                    <a class="play-link" href="snes.html?rom=yoshiisland">Jogar</a>
+                    <button class="copy-button" type="button" data-copy="https://estilonerd.github.io/emulador/snes.html?rom=yoshiisland" aria-label="Copiar link de Yoshi's Island">Copiar</button>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script>
+        document.querySelectorAll('[data-copy]').forEach(function(button) {
+            var defaultText = button.textContent;
+
+            button.addEventListener('click', function() {
+                var link = button.getAttribute('data-copy');
+                var markCopied = function() {
+                    button.textContent = 'OK';
+                    window.setTimeout(function() {
+                        button.textContent = defaultText;
+                    }, 1400);
+                };
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(link).then(markCopied);
+                    return;
+                }
+
+                window.prompt('Copie o link permanente:', link);
+                markCopied();
+            });
+        });
+    </script>
+</body>
+</html>
+
