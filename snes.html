@@ -330,6 +330,13 @@
             border-radius: 0 0 0 22px;
         }
 
+        .ios-controller-logo {
+            display: none;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
         .main-controls {
             display: grid;
             grid-template-columns: auto auto;
@@ -859,6 +866,13 @@
 
         @supports (-webkit-touch-callout: none) {
             @media (orientation: portrait) {
+                .ios-controller-logo {
+                    display: block;
+                    width: clamp(74px, 21vw, 96px);
+                    height: clamp(28px, 5.8svh, 38px);
+                    object-fit: contain;
+                }
+
                 .main-controls {
                     justify-content: space-between;
                     gap: 0;
@@ -882,6 +896,11 @@
             }
 
             @media (orientation: portrait) and (max-width: 380px) {
+                .ios-controller-logo {
+                    width: 74px;
+                    height: 30px;
+                }
+
                 .main-controls {
                     margin-inline: 0;
                 }
@@ -899,6 +918,18 @@
             }
 
             @media (orientation: landscape) and (max-height: 520px) {
+                .ios-controller-logo {
+                    display: block;
+                    position: absolute;
+                    left: 50%;
+                    top: max(6px, env(safe-area-inset-top));
+                    width: clamp(240px, 24vw, 493px);
+                    height: clamp(44px, 8.4svh, 80px);
+                    object-fit: contain;
+                    transform: translateX(-50%);
+                    z-index: 4;
+                }
+
                 .dpad-wrap {
                     transform: none;
                 }
@@ -928,6 +959,7 @@
         <section class="controls" aria-label="Controles do SNES">
             <div class="controller-top">
                 <button class="touch-button shoulder left" type="button" data-input="10" aria-label="Botao L">L</button>
+                <img class="ios-controller-logo" src="images/@estilonerd.svg" alt="" aria-hidden="true" draggable="false">
                 <button class="touch-button shoulder right" type="button" data-input="11" aria-label="Botao R">R</button>
             </div>
 
