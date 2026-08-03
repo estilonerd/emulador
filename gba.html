@@ -193,8 +193,8 @@
             background: rgba(255, 255, 255, 0.05) !important;
             display: flex !important;
             align-items: center !important;
-            justify-content: flex-start !important;
-            gap: 8px !important;
+            justify-content: center !important;
+            gap: 10px !important;
         }
 
         .emulator-shell.show-native-menu #game .custom-menu-volume {
@@ -244,7 +244,7 @@
         .emulator-shell.show-native-menu #game .ejs_menu_text {
             color: #fff !important;
             display: block !important;
-            flex: 1 !important;
+            flex: 0 1 auto !important;
             opacity: 1 !important;
             transform: none !important;
             position: static !important;
@@ -252,8 +252,9 @@
             background: transparent !important;
             box-shadow: none !important;
             margin: 0 !important;
-            padding: 0 0 0 8px !important;
+            padding: 0 !important;
             pointer-events: none !important;
+            text-align: center !important;
         }
 
         .emulator-shell.show-native-menu #game .ejs_menu_text::before,

@@ -200,8 +200,8 @@
             background: rgba(255, 255, 255, 0.05) !important;
             display: flex !important;
             align-items: center !important;
-            justify-content: flex-start !important;
-            gap: 8px !important;
+            justify-content: center !important;
+            gap: 10px !important;
         }
 
         .emulator-shell.show-native-menu #game .custom-menu-hidden {
@@ -255,7 +255,7 @@
         .emulator-shell.show-native-menu #game .ejs_menu_text {
             color: #fff !important;
             display: block !important;
-            flex: 1 !important;
+            flex: 0 1 auto !important;
             opacity: 1 !important;
             transform: none !important;
             position: static !important;
@@ -263,8 +263,9 @@
             background: transparent !important;
             box-shadow: none !important;
             margin: 0 !important;
-            padding: 0 0 0 8px !important;
+            padding: 0 !important;
             pointer-events: none !important;
+            text-align: center !important;
         }
 
         .emulator-shell.show-native-menu #game .ejs_menu_text::before,
@@ -1449,24 +1450,33 @@
                 ].join(' '));
             }
 
-            function getAllowedMenuLabel(button) {
+            function getAllowedMenuAction(button) {
                 var text = getMenuButtonText(button);
 
                 if (text.indexOf('reset') !== -1 || text.indexOf('reiniciar') !== -1) {
-                    return 'Reset';
+                    return 'reset';
                 }
 
                 if (text.indexOf('pause') !== -1 || text.indexOf('pausar') !== -1 || text.indexOf('play') !== -1 || text.indexOf('resume') !== -1) {
-                    return 'Pausar';
+                    return 'pause';
                 }
 
                 if ((text.indexOf('load') !== -1 && text.indexOf('state') !== -1) || text.indexOf('loadstate') !== -1 || text.indexOf('carregar') !== -1) {
-                    return 'Carregar Save State';
+                    return 'load-state';
                 }
 
                 if ((text.indexOf('save') !== -1 && text.indexOf('state') !== -1) || text.indexOf('savestate') !== -1 || text.indexOf('salvar') !== -1 || text.indexOf('armazenar') !== -1) {
-                    return 'Armazenar Save State';
+                    return 'save-state';
                 }
+
+                return '';
+            }
+
+            function getAllowedMenuLabel(action) {
+                if (action === 'reset') return 'Reset';
+                if (action === 'pause') return 'Pausar';
+                if (action === 'load-state') return 'Carregar Save State';
+                if (action === 'save-state') return 'Armazenar Save State';
 
                 return '';
             }
@@ -1513,18 +1523,25 @@
                         item.classList.add('custom-menu-hidden');
                     });
 
+                    var usedActions = {};
+
                     menu.querySelectorAll('.ejs_menu_button').forEach(function(button) {
-                        var label = getAllowedMenuLabel(button);
+                        var action = getAllowedMenuAction(button);
+                        var label = getAllowedMenuLabel(action);
+                        var shouldShow = Boolean(action && label && !usedActions[action]);
 
-                        button.classList.toggle('custom-menu-hidden', !label);
+                        button.classList.toggle('custom-menu-hidden', !shouldShow);
 
-                        if (label) {
+                        if (shouldShow) {
+                            usedActions[action] = true;
                             setMenuButtonLabel(button, label);
+                            button.dataset.customMenuAction = action;
 
-                            if (label === 'Pausar') {
-                                button.dataset.customMenuAction = 'pause';
+                            if (action === 'pause') {
                                 bindPauseButton(button);
                             }
+                        } else {
+                            delete button.dataset.customMenuAction;
                         }
                     });
                 } finally {
